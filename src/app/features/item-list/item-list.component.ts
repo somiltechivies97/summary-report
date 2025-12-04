@@ -1,98 +1,71 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { lookupItem, categoryList } from '../../shared/constants/itemList';
-import { LookupItem } from '../../shared/models/item.model';
+import { ItemService, Item, Category } from '../../core/services/item.service';
 
 @Component({
   selector: 'app-item-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="item-list-container">
-      <h1>Item List</h1>
-      <p class="subtitle">Complete list of available items</p>
-      
-      <div class="controls-section">
-        <div class="search-section">
-          <label for="searchInput">Search by Name:</label>
-          <input 
-            type="text" 
-            id="searchInput" 
-            [(ngModel)]="searchTerm" 
-            (input)="onSearchChange()" 
-            placeholder="Enter item name..."
-            class="search-input"
-          >
-        </div>
-        <div class="filter-section">
-          <label for="categoryFilter">Filter by Category:</label>
-          <select id="categoryFilter" [(ngModel)]="selectedCategory" (change)="onCategoryChange()" class="category-dropdown">
-            <option value="">All Categories</option>
-            <option *ngFor="let category of categories" [value]="category.Name">{{ category.Name }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="stats-section">
-        <div class="stat-card">
-          <h3>Total Items</h3>
-          <p>{{ filteredItems.length }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Categories</h3>
-          <p>{{ categories.length }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Selected Category</h3>
-          <p>{{ selectedCategory || 'All' }}</p>
-        </div>
-      </div>
-      
-      <div class="table-section">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>MRP (₹)</th>
-              <th>Price (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of filteredItems; let i = index">
-              <td>{{ item.Name }}</td>
-              <td>
-                <span class="category-badge" [class]="getCategoryClass(item.Category)">
-                  {{ item.Category || 'N/A' }}
-                </span>
-              </td>
-              <td class="text-center">{{ item.MRP || '0' }}</td>
-              <td class="text-center">{{ item.Price || '0' }}</td>
-            </tr>
-            <tr *ngIf="filteredItems.length === 0" class="no-data-row">
-              <td colspan="5" class="text-center">No items found matching your criteria</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `,
+  templateUrl: './item-list.component.html',
   styleUrls: ['./item-list.component.css'],
 })
-export class ItemListComponent {
-  items: LookupItem[] = lookupItem;
-  filteredItems: LookupItem[] = [...this.items];
+export class ItemListComponent implements OnInit {
+  items: Item[] = [];
+  filteredItems: Item[] = [];
   selectedCategory = '';
   searchTerm = '';
-  categories: any[] = categoryList;
+  categories: Category[] = [];
 
-  constructor() {
-    this.initializeData();
+  showModal = false;
+  isEditMode = false;
+  currentItemId: string | null = null;
+
+  itemForm: Partial<Item> = {
+    name: '',
+    code: '',
+    category: '',
+    mrp: 0,
+    price: 0,
+    sequence: 999
+  };
+
+  loading = false;
+  errorMessage = '';
+
+  constructor(private itemService: ItemService) {}
+
+  ngOnInit() {
+    this.loadCategories();
+    this.loadItems();
   }
 
-  initializeData() {
-    this.filteredItems = [...this.items];
+  loadCategories() {
+    this.itemService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.errorMessage = 'Failed to load categories';
+      }
+    });
+  }
+
+  loadItems() {
+    this.loading = true;
+    this.itemService.getItems().subscribe({
+      next: (items) => {
+        this.items = items;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading items:', error);
+        this.errorMessage = 'Failed to load items';
+        this.loading = false;
+      }
+    });
   }
 
   onCategoryChange() {
@@ -106,28 +79,117 @@ export class ItemListComponent {
   applyFilters() {
     let filtered = [...this.items];
 
-    // Apply category filter
     if (this.selectedCategory) {
       filtered = filtered.filter(
-        (item) => item.Category === this.selectedCategory
+        (item) => item.category === this.selectedCategory
       );
     }
 
-    // Apply search filter
     if (this.searchTerm.trim()) {
       const searchLower = this.searchTerm.toLowerCase().trim();
       filtered = filtered.filter((item) =>
-        item.Name.toLowerCase().includes(searchLower)
+        item.name.toLowerCase().includes(searchLower)
       );
     }
 
     this.filteredItems = filtered;
   }
 
+  openCreateModal() {
+    this.isEditMode = false;
+    this.currentItemId = null;
+    this.itemForm = {
+      name: '',
+      code: '',
+      category: '',
+      mrp: 0,
+      price: 0,
+      sequence: 999
+    };
+    this.showModal = true;
+    this.errorMessage = '';
+  }
+
+  openEditModal(item: Item) {
+    this.isEditMode = true;
+    this.currentItemId = item.id || null;
+    this.itemForm = {
+      name: item.name,
+      code: item.code,
+      category: item.category,
+      mrp: item.mrp,
+      price: item.price,
+      sequence: item.sequence
+    };
+    this.showModal = true;
+    this.errorMessage = '';
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.errorMessage = '';
+  }
+
+  saveItem() {
+    if (!this.itemForm.name || !this.itemForm.category) {
+      this.errorMessage = 'Name and Category are required';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    if (this.isEditMode && this.currentItemId) {
+      this.itemService.updateItem(this.currentItemId, this.itemForm).subscribe({
+        next: () => {
+          this.loadItems();
+          this.closeModal();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error updating item:', error);
+          this.errorMessage = 'Failed to update item';
+          this.loading = false;
+        }
+      });
+    } else {
+      this.itemService.createItem(this.itemForm as Omit<Item, 'id' | 'created_at' | 'updated_at'>).subscribe({
+        next: () => {
+          this.loadItems();
+          this.closeModal();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error creating item:', error);
+          this.errorMessage = 'Failed to create item';
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  deleteItem(item: Item) {
+    if (!item.id) return;
+
+    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      this.loading = true;
+      this.itemService.deleteItem(item.id).subscribe({
+        next: () => {
+          this.loadItems();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error deleting item:', error);
+          this.errorMessage = 'Failed to delete item';
+          this.loading = false;
+        }
+      });
+    }
+  }
+
   getCategoryClass(category: string): string {
     if (!category) return 'category-default';
 
-    // Generate consistent class names based on category
     const categoryClasses: { [key: string]: string } = {
       POPCORN: 'category-popcorn',
       FRYUMS: 'category-fryums',
