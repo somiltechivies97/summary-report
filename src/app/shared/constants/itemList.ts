@@ -1391,3 +1391,41 @@ export const categoryList = [
     Sequence: 18,
   },
 ];
+
+export const businessCategory = [
+  {
+    Id: 1,
+    Name: 'Anand Jolliz',
+    Sequence: 1,
+  },
+  {
+    Id: 2,
+    Name: 'Real Bites',
+    Sequence: 2,
+  },
+  {
+    Id: 3,
+    Name: 'Hoppins',
+    Sequence: 3,
+  },
+  {
+    Id: 4,
+    Name: 'Derby',
+    Sequence: 4,
+  },
+  {
+    Id: 5,
+    Name: 'Algrow',
+    Sequence: 5,
+  },
+  {
+    Id: 6,
+    Name: 'Baby Paan',
+    Sequence: 6,
+  },
+  {
+    Id: 7,
+    Name: 'Automize Spices',
+    Sequence: 7,
+  },
+];
