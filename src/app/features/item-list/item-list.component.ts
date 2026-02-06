@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemService, Item, Category } from '../../core/services/item.service';
+import { businessCategory } from '../../shared/constants/itemList';
 
 @Component({
   selector: 'app-item-list',
@@ -16,6 +17,7 @@ export class ItemListComponent implements OnInit {
   selectedCategory = '';
   searchTerm = '';
   categories: Category[] = [];
+  businessCategories = businessCategory;
 
   showModal = false;
   isEditMode = false;
