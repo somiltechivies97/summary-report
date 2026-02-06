@@ -16,6 +16,7 @@ export interface Item {
   id?: string;
   name: string;
   code?: string;
+  business_category: string;
   category: string;
   purchase: number;
   sale: number;

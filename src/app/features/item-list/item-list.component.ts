@@ -24,6 +24,7 @@ export class ItemListComponent implements OnInit {
   itemForm: Partial<Item> = {
     name: '',
     code: '',
+    business_category: '',
     category: '',
     purchase: 0,
     sale: 0,
@@ -102,6 +103,7 @@ export class ItemListComponent implements OnInit {
     this.itemForm = {
       name: '',
       code: '',
+      business_category: '',
       category: '',
       purchase: 0,
       sale: 0,
@@ -118,6 +120,7 @@ export class ItemListComponent implements OnInit {
     this.itemForm = {
       name: item.name,
       code: item.code,
+      business_category: item.business_category,
       category: item.category,
       purchase: item.purchase,
       sale: item.sale,
@@ -134,7 +137,7 @@ export class ItemListComponent implements OnInit {
   }
 
   saveItem() {
-    if (!this.itemForm.name || !this.itemForm.category || this.itemForm.purchase === undefined || this.itemForm.sale === undefined || this.itemForm.mrp === undefined || this.itemForm.sequence === undefined) {
+    if (!this.itemForm.name || !this.itemForm.business_category || !this.itemForm.category || this.itemForm.purchase === undefined || this.itemForm.sale === undefined || this.itemForm.mrp === undefined || this.itemForm.sequence === undefined) {
       this.errorMessage = 'All fields are required';
       return;
     }
