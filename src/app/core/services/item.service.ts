@@ -17,8 +17,9 @@ export interface Item {
   name: string;
   code?: string;
   category: string;
+  purchase: number;
+  sale: number;
   mrp: number;
-  price: number;
   sequence: number;
   created_at?: string;
   updated_at?: string;

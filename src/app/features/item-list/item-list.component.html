@@ -51,8 +51,9 @@
         <tr>
           <th>Name</th>
           <th>Category</th>
+          <th>Purchase (₹)</th>
+          <th>Sale (₹)</th>
           <th>MRP (₹)</th>
-          <th>Price (₹)</th>
           <th>Sequence</th>
           <th>Actions</th>
         </tr>
@@ -65,8 +66,9 @@
               {{ item.category || 'N/A' }}
             </span>
           </td>
+          <td class="text-center">{{ item.purchase || 0 }}</td>
+          <td class="text-center">{{ item.sale || 0 }}</td>
           <td class="text-center">{{ item.mrp || 0 }}</td>
-          <td class="text-center">{{ item.price || 0 }}</td>
           <td class="text-center">{{ item.sequence }}</td>
           <td class="text-center">
             <button class="btn-action edit-btn" (click)="openEditModal(item)">Edit</button>
@@ -74,10 +76,10 @@
           </td>
         </tr>
         <tr *ngIf="loading" class="no-data-row">
-          <td colspan="6" class="text-center">Loading...</td>
+          <td colspan="7" class="text-center">Loading...</td>
         </tr>
         <tr *ngIf="!loading && filteredItems.length === 0" class="no-data-row">
-          <td colspan="6" class="text-center">No items found matching your criteria</td>
+          <td colspan="7" class="text-center">No items found matching your criteria</td>
         </tr>
       </tbody>
     </table>
@@ -126,7 +128,37 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="itemMRP">MRP (₹)</label>
+            <label for="itemPurchase">Purchase <span class="required">*</span></label>
+            <input
+              type="number"
+              id="itemPurchase"
+              [(ngModel)]="itemForm.purchase"
+              name="purchase"
+              class="form-input"
+              min="0"
+              step="0.01"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="itemSale">Sale <span class="required">*</span></label>
+            <input
+              type="number"
+              id="itemSale"
+              [(ngModel)]="itemForm.sale"
+              name="sale"
+              class="form-input"
+              min="0"
+              step="0.01"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="itemMRP">MRP <span class="required">*</span></label>
             <input
               type="number"
               id="itemMRP"
@@ -135,33 +167,22 @@
               class="form-input"
               min="0"
               step="0.01"
+              required
             >
           </div>
 
           <div class="form-group">
-            <label for="itemPrice">Price (₹)</label>
+            <label for="itemSequence">Sequence <span class="required">*</span></label>
             <input
               type="number"
-              id="itemPrice"
-              [(ngModel)]="itemForm.price"
-              name="price"
+              id="itemSequence"
+              [(ngModel)]="itemForm.sequence"
+              name="sequence"
               class="form-input"
               min="0"
-              step="0.01"
+              required
             >
           </div>
-        </div>
-
-        <div class="form-group">
-          <label for="itemSequence">Sequence</label>
-          <input
-            type="number"
-            id="itemSequence"
-            [(ngModel)]="itemForm.sequence"
-            name="sequence"
-            class="form-input"
-            min="0"
-          >
         </div>
 
         <div class="modal-footer">

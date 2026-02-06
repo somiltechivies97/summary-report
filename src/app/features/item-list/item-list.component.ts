@@ -25,8 +25,9 @@ export class ItemListComponent implements OnInit {
     name: '',
     code: '',
     category: '',
+    purchase: 0,
+    sale: 0,
     mrp: 0,
-    price: 0,
     sequence: 999
   };
 
@@ -102,8 +103,9 @@ export class ItemListComponent implements OnInit {
       name: '',
       code: '',
       category: '',
+      purchase: 0,
+      sale: 0,
       mrp: 0,
-      price: 0,
       sequence: 999
     };
     this.showModal = true;
@@ -117,8 +119,9 @@ export class ItemListComponent implements OnInit {
       name: item.name,
       code: item.code,
       category: item.category,
+      purchase: item.purchase,
+      sale: item.sale,
       mrp: item.mrp,
-      price: item.price,
       sequence: item.sequence
     };
     this.showModal = true;
@@ -131,8 +134,8 @@ export class ItemListComponent implements OnInit {
   }
 
   saveItem() {
-    if (!this.itemForm.name || !this.itemForm.category) {
-      this.errorMessage = 'Name and Category are required';
+    if (!this.itemForm.name || !this.itemForm.category || this.itemForm.purchase === undefined || this.itemForm.sale === undefined || this.itemForm.mrp === undefined || this.itemForm.sequence === undefined) {
+      this.errorMessage = 'All fields are required';
       return;
     }
 
