@@ -265,6 +265,7 @@ export class ItemListComponent implements OnInit {
     })
       .then(res => res.json())
       .then(data => {
+        console.log(data)
         this.importLoading = false;
         if (data.success) {
           this.importMessage = `Success! Imported ${data.count} items`;
