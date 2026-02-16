@@ -36,6 +36,9 @@ export class ItemListComponent implements OnInit {
 
   loading = false;
   errorMessage = '';
+  importLoading = false;
+  importMessage = '';
+  showImportForm = false;
 
   constructor(private itemService: ItemService) {}
 
@@ -212,5 +215,68 @@ export class ItemListComponent implements OnInit {
     };
 
     return categoryClasses[category] || 'category-default';
+  }
+
+  downloadTemplate() {
+    const csv = [
+      ['name', 'code', 'category', 'business_category', 'mrp', 'purchase', 'sale', 'sequence'],
+      ['Item Name', 'ITEM001', 'POPCORN', 'Anand Jolliz', '50', '40', '42', '1'],
+      ['', '', '', '', '', '', '', '']
+    ];
+
+    let csvContent = csv.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+    const link = document.createElement('a');
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+    link.download = 'items-template.csv';
+    link.click();
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    this.importFile(file);
+  }
+
+  importFile(file: File) {
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
+      this.importMessage = 'Please upload an Excel (.xlsx, .xls) or CSV file';
+      return;
+    }
+
+    this.importLoading = true;
+    this.importMessage = '';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const supabaseUrl = 'https://xiwgrqsrrvoxhcgqhrdk.supabase.co';
+    const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3aWdycXNycnZveGhjZ3FocmRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTUwNzAxOTgsImV4cCI6MTk4MDY0NjE5OH0.x1B7xz4Z7V_7WRsXrJFbj6nZEUxR9FzN0E0n3jqXw0s';
+
+    fetch(`${supabaseUrl}/functions/v1/import-items`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+      },
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        this.importLoading = false;
+        if (data.success) {
+          this.importMessage = `Success! Imported ${data.count} items`;
+          this.showImportForm = false;
+          setTimeout(() => this.loadItems(), 1000);
+        } else {
+          this.importMessage = data.error || 'Import failed';
+        }
+      })
+      .catch(error => {
+        this.importLoading = false;
+        this.importMessage = 'Import failed: ' + error.message;
+      });
   }
 }

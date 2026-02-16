@@ -22,12 +22,81 @@
       </select>
     </div>
     <div class="action-section">
-      <button class="btn create-btn" (click)=" ()">Create New Item</button>
+      <button class="btn create-btn" (click)="openCreateModal()">Create New Item</button>
+      <button class="btn import-btn" (click)="showImportForm = !showImportForm">Import from Excel</button>
     </div>
   </div>
 
   <div class="alert alert-error" *ngIf="errorMessage && !showModal">
     {{ errorMessage }}
+  </div>
+
+  <div class="import-form" *ngIf="showImportForm">
+    <div class="import-card">
+      <h2>Import Items from Excel</h2>
+      <p class="import-description">Upload an Excel file with your items. Use the template below to ensure the correct format.</p>
+
+      <button class="btn btn-secondary" (click)="downloadTemplate()">Download Template</button>
+
+      <div class="file-upload-area">
+        <input
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept=".xlsx,.xls,.csv"
+          style="display: none"
+        >
+        <button class="btn btn-upload" (click)="fileInput.click()" [disabled]="importLoading">
+          {{ importLoading ? 'Uploading...' : 'Choose File' }}
+        </button>
+      </div>
+
+      <div class="import-message" *ngIf="importMessage">
+        <p [ngClass]="{'success': importMessage.includes('Success'), 'error': importMessage.includes('failed') || importMessage.includes('Please')}">
+          {{ importMessage }}
+        </p>
+      </div>
+
+      <div class="template-info">
+        <h3>Excel File Format:</h3>
+        <table class="template-table">
+          <thead>
+            <tr>
+              <th>name</th>
+              <th>code</th>
+              <th>category</th>
+              <th>business_category</th>
+              <th>mrp</th>
+              <th>purchase</th>
+              <th>sale</th>
+              <th>sequence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Item Name</td>
+              <td>ITEM001</td>
+              <td>POPCORN</td>
+              <td>Anand Jolliz</td>
+              <td>50</td>
+              <td>40</td>
+              <td>42</td>
+              <td>1</td>
+            </tr>
+            <tr>
+              <td>Another Item</td>
+              <td>ITEM002</td>
+              <td>NAMKEEN</td>
+              <td>Real Bites</td>
+              <td>100</td>
+              <td>80</td>
+              <td>85</td>
+              <td>2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div class="stats-section">
