@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { lookupItem } from '../../shared/constants/itemList';
+import { lookupItem, businessCategory } from '../../shared/constants/itemList';
 import { categoryList } from '../../shared/constants/itemList';
 // import { LookupItem } from '../../shared/models/item.model';
 import * as XLSX from 'xlsx';
@@ -27,6 +27,14 @@ type AOA = any[][];
           <button class="upload-btn" (click)="onExportPDF()" *ngIf="items.length > 0">Export</button>
         </div>
         
+        <div class="filter-section">
+          <label for="businessCategoryFilter">Filter by Business Category:</label>
+          <select id="businessCategoryFilter" [(ngModel)]="selectedBusinessCategory" (change)="onBusinessCategoryChange()" class="category-dropdown">
+            <option value="">All Business Categories</option>
+            <option *ngFor="let bc of businessCategories" [value]="bc.Name">{{ bc.Name }}</option>
+          </select>
+        </div>
+
         <div class="filter-section">
           <label for="categoryFilter">Filter by Category:</label>
           <select id="categoryFilter" [(ngModel)]="selectedCategory" (change)="onCategoryChange()" class="category-dropdown">
@@ -72,7 +80,9 @@ export class HomeComponent {
   items: any = [];
   filteredItems = [...this.items];
   selectedCategory = '';
+  selectedBusinessCategory = '';
   categories: any = [];
+  businessCategories = businessCategory;
   itemList = lookupItem;
   totalSalesAmt: any;
 
@@ -418,15 +428,24 @@ export class HomeComponent {
     doc.save('items_report.pdf');
   }
 
+  onBusinessCategoryChange() {
+    this.applyFilters();
+  }
+
   onCategoryChange() {
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    let filtered = [...this.items];
+
     if (this.selectedCategory) {
-      this.filteredItems = this.items.filter(
+      filtered = filtered.filter(
         (item: any) => item.Category === this.selectedCategory
       );
-    } else {
-      this.filteredItems = [...this.items];
     }
 
+    this.filteredItems = filtered;
     this.salesAmtCalc();
   }
 
@@ -440,6 +459,7 @@ export class HomeComponent {
     this.items = [];
     this.filteredItems = [];
     this.selectedCategory = '';
+    this.selectedBusinessCategory = '';
     this.totalSalesAmt = 0;
   }
 

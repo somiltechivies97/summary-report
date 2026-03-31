@@ -23,40 +23,11 @@
     </div>
     <div class="action-section">
       <button class="btn create-btn" (click)="openCreateModal()">Create New Item</button>
-      <button class="btn import-btn" (click)="showImportForm = !showImportForm">Import from Excel</button>
     </div>
   </div>
 
   <div class="alert alert-error" *ngIf="errorMessage && !showModal">
     {{ errorMessage }}
-  </div>
-
-  <div class="import-form" *ngIf="showImportForm">
-    <div class="import-card">
-      <h2>Import Items from Excel</h2>
-      <p class="import-description">Upload an Excel file with your items. Use the template below to ensure the correct format.</p>
-
-      <button class="btn btn-secondary" (click)="downloadTemplate()">Download Template</button>
-
-      <div class="file-upload-area">
-        <input
-          type="file"
-          #fileInput
-          (change)="onFileSelected($event)"
-          accept=".xlsx,.xls,.csv"
-          style="display: none"
-        >
-        <button class="btn btn-upload" (click)="fileInput.click()" [disabled]="importLoading">
-          {{ importLoading ? 'Uploading...' : 'Choose File' }}
-        </button>
-      </div>
-
-      <div class="import-message" *ngIf="importMessage">
-        <p [ngClass]="{'success': importMessage.includes('Success'), 'error': importMessage.includes('failed') || importMessage.includes('Please')}">
-          {{ importMessage }}
-        </p>
-      </div>
-    </div>
   </div>
 
   <div class="stats-section">
